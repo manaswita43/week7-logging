@@ -49,3 +49,29 @@ jobs:
       - name: Deploy to GKE
         run: |
           kubectl set image deployment/iris-api iris-api=$IMAGE      
+
+  stress-test:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install wrk
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential libssl-dev git
+          git clone https://github.com/wg/wrk.git /tmp/wrk
+          cd /tmp/wrk && make && sudo cp wrk /usr/local/bin/
+      - name: Create post.lua
+        run: |
+          cat > post.lua <<'EOF'
+          wrk.method = "POST"
+          wrk.headers["Content-Type"] = "application/json"
+          wrk.body = '[[5.1, 3.5, 1.4, 0.2]]'
+          EOF
+      - name: Run wrk stress test
+        run: |
+          wrk -t12 -c1000 -d60s -s post.lua http://${{ secrets.SERVICE_EXTERNAL_IP }}:8200/predict/ | tee wrk_output.txt
+      - name: Upload results
+        uses: actions/upload-artifact@v3
+        with:
+          name: wrk-results
+          path: wrk_output.txt
