@@ -27,7 +27,7 @@ jobs:
       - name: Build Docker Image
         run: |
           IMAGE=${{ secrets.GAR_LOCATION }}-docker.pkg.dev/${{ secrets.PROJECT_ID }}/${{ secrets.GAR_REPO }}/iris-api:${{ github.sha }}
-          docker build -t $IMAGE ./app
+          docker build -t $IMAGE
           echo "IMAGE=$IMAGE" >> $GITHUB_ENV
 
       - name: Push Image to Artifact Registry
