@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iris-api
+  labels:
+    app: iris-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iris-api
+  template:
+    metadata:
+      labels:
+        app: iris-api
+    spec:
+      containers:
+      - name: iris-api
+        # REPLACE with your image URL: e.g. us-central1-docker.pkg.dev/<PROJECT_ID>/<REPO>/iris-api:<TAG>
+        image: "us-central1-docker.pkg.dev/mlops-473405/ml-docker/iris-api:latest"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8200
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "512Mi"
+          limits:
+            cpu: "1000m"
+            memory: "1Gi"
+        env:
+        - name: MODEL_PATH
+          value: "/app/models/model.joblib"
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8200
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8200
+          initialDelaySeconds: 10
+          periodSeconds: 10
