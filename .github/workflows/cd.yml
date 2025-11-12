@@ -30,6 +30,10 @@ jobs:
           docker build -t $IMAGE .
           echo "IMAGE=$IMAGE" >> $GITHUB_ENV
 
+      - name: Authenticate to artifact
+        run: |
+          gcloud auth configure-docker us-central1-docker.pkg.dev
+
       - name: Push Image to Artifact Registry
         run: |
           docker push $IMAGE
